@@ -1,0 +1,245 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif}
+.app{background:#1a1a1a;min-height:100vh;padding:16px;color:#fff}
+.header{text-align:center;padding:12px 0 8px}
+.logo-area{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:4px}
+.logo-icon{width:48px;height:48px;background:#F97316;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.brand-name{font-size:22px;font-weight:700;color:#fff;letter-spacing:1px}
+.brand-sub{font-size:11px;color:#aaa;letter-spacing:2px;text-transform:uppercase}
+.brand-badge{background:#F97316;color:#fff;font-size:10px;font-weight:700;letter-spacing:1.5px;padding:2px 8px;border-radius:3px;display:inline-block;margin-top:2px}
+.subtitle{color:#aaa;font-size:13px;margin-top:6px}
+.main{display:flex;flex-wrap:wrap;gap:20px;justify-content:center;align-items:flex-start;margin-top:16px}
+.wheel-col{display:flex;flex-direction:column;align-items:center;gap:16px;flex:1;min-width:280px;max-width:420px}
+.canvas-wrap{position:relative;width:100%;max-width:380px}
+canvas{display:block;width:100%;border-radius:50%}
+.pointer{position:absolute;top:50%;right:-18px;transform:translateY(-50%);width:0;height:0;border-top:18px solid transparent;border-bottom:18px solid transparent;border-right:32px solid #F97316;filter:drop-shadow(0 0 4px rgba(249,115,22,0.5))}
+.spin-btn{background:#F97316;color:#fff;border:none;border-radius:50px;padding:14px 36px;font-size:16px;font-weight:700;cursor:pointer;letter-spacing:.5px;width:100%;max-width:320px;transition:transform .1s,background .2s}
+.spin-btn:hover{background:#ea6c0a}
+.spin-btn:active{transform:scale(0.97)}
+.spin-btn:disabled{background:#555;cursor:not-allowed}
+.panel{background:#2a2a2a;border-radius:14px;padding:16px;width:100%;max-width:320px;flex:0 0 auto}
+.panel-title{font-size:15px;font-weight:600;color:#fff;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.add-row{display:flex;gap:8px;margin-bottom:12px}
+.add-row input[type=text]{flex:1;background:#1a1a1a;border:1px solid #444;border-radius:8px;color:#fff;padding:8px 10px;font-size:13px;outline:none}
+.add-row input[type=text]:focus{border-color:#F97316}
+.add-row input[type=color]{width:36px;height:36px;border:none;border-radius:6px;cursor:pointer;padding:2px;background:#1a1a1a}
+.add-btn{background:#F97316;border:none;border-radius:8px;color:#fff;width:36px;height:36px;font-size:20px;cursor:pointer;font-weight:700;flex-shrink:0}
+.prize-list{display:flex;flex-direction:column;gap:6px;max-height:280px;overflow-y:auto}
+.prize-item{display:flex;align-items:center;gap:8px;background:#1a1a1a;border-radius:8px;padding:7px 10px}
+.prize-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0;cursor:pointer;border:2px solid rgba(255,255,255,0.2)}
+.prize-name{flex:1;font-size:13px;color:#ddd}
+.prize-name-input{flex:1;background:transparent;border:none;color:#ddd;font-size:13px;outline:none;width:100%}
+.del-btn{background:none;border:none;color:#777;cursor:pointer;font-size:16px;padding:0 2px;line-height:1}
+.del-btn:hover{color:#ff5555}
+.hint{font-size:11px;color:#777;margin-top:8px;text-align:center}
+.result-overlay{display:none;position:absolute;inset:0;border-radius:50%;background:rgba(0,0,0,0.75);align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:20px}
+.result-overlay.show{display:flex}
+.result-emoji{font-size:36px;margin-bottom:8px}
+.result-text{font-size:13px;color:#aaa;margin-bottom:4px}
+.result-prize{font-size:20px;font-weight:700;color:#F97316;word-break:break-word}
+.result-close{margin-top:12px;background:#F97316;border:none;border-radius:20px;color:#fff;padding:7px 20px;font-size:13px;cursor:pointer;font-weight:600}
+.color-hint{font-size:10px;color:#777;margin-left:4px}
+</style>
+
+<div class="app">
+  <div class="header">
+    <div class="logo-area">
+      <div class="logo-icon">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="14" cy="14" r="12" stroke="white" stroke-width="2.5" fill="none"/>
+          <circle cx="14" cy="14" r="5" stroke="white" stroke-width="2" fill="none"/>
+          <line x1="14" y1="2" x2="14" y2="9" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          <line x1="14" y1="19" x2="14" y2="26" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          <line x1="2" y1="14" x2="9" y2="14" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          <line x1="19" y1="14" x2="26" y2="14" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-name">MARROQUÍN</div>
+        <div class="brand-sub">Importadora</div>
+        <div class="brand-badge">CENTRO DE SERVICIOS</div>
+      </div>
+    </div>
+    <div class="subtitle">Gira la ruleta y descubre tu premio</div>
+  </div>
+
+  <div class="main">
+    <div class="wheel-col">
+      <div class="canvas-wrap">
+        <canvas id="wheelCanvas" width="400" height="400"></canvas>
+        <div class="pointer"></div>
+        <div class="result-overlay" id="resultOverlay">
+          <div class="result-emoji">🎉</div>
+          <div class="result-text">¡Felicidades! Ganaste:</div>
+          <div class="result-prize" id="resultPrize"></div>
+          <button class="result-close" onclick="closeResult()">Seguir girando</button>
+        </div>
+      </div>
+      <button class="spin-btn" id="spinBtn" onclick="spin()">
+        &#9654; Girar la ruleta
+      </button>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">
+        <i class="ti ti-gift" style="font-size:18px;color:#F97316" aria-hidden="true"></i>
+        Premios <span id="prizeCount" style="color:#F97316"></span>
+      </div>
+      <div class="add-row">
+        <input type="color" id="newColor" value="#F97316" title="Color del premio">
+        <input type="text" id="newName" placeholder="Nombre del premio..." maxlength="22">
+        <button class="add-btn" onclick="addPrize()" aria-label="Agregar premio">+</button>
+      </div>
+      <div class="prize-list" id="prizeList"></div>
+      <div class="hint" id="hint"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+let prizes=[
+  {name:'100 Bs',color:'#F97316'},
+  {name:'Descuento 10%',color:'#3B82F6'},
+  {name:'Premio sorpresa',color:'#22C55E'},
+  {name:'Otra vuelta',color:'#EF4444'},
+  {name:'50 Bs',color:'#A855F7'},
+  {name:'Vale gratis',color:'#EAB308'},
+  {name:'Sin premio',color:'#EC4899'},
+  {name:'Mega premio',color:'#06B6D4'},
+];
+let spinning=false;
+let currentAngle=0;
+let animId=null;
+
+const canvas=document.getElementById('wheelCanvas');
+const ctx=canvas.getContext('2d');
+const W=400,H=400,cx=200,cy=200,R=185;
+
+function drawWheel(){
+  ctx.clearRect(0,0,W,H);
+  const n=prizes.length;
+  if(n===0){ctx.fillStyle='#333';ctx.beginPath();ctx.arc(cx,cy,R,0,Math.PI*2);ctx.fill();return;}
+  const arc=2*Math.PI/n;
+  for(let i=0;i<n;i++){
+    const start=currentAngle+i*arc;
+    const end=start+arc;
+    ctx.beginPath();
+    ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,R,start,end);
+    ctx.closePath();
+    ctx.fillStyle=prizes[i].color;
+    ctx.fill();
+    ctx.strokeStyle='rgba(0,0,0,0.25)';
+    ctx.lineWidth=1.5;
+    ctx.stroke();
+    ctx.save();
+    ctx.translate(cx,cy);
+    ctx.rotate(start+arc/2);
+    ctx.textAlign='right';
+    ctx.fillStyle='#fff';
+    ctx.font='bold 13px system-ui,sans-serif';
+    ctx.shadowColor='rgba(0,0,0,0.6)';
+    ctx.shadowBlur=4;
+    const maxLen=prizes[i].name.length>14?13:prizes[i].name.length>10?14:15;
+    const fontSize=prizes[i].name.length>14?11:prizes[i].name.length>10?12:13;
+    ctx.font=`bold ${fontSize}px system-ui,sans-serif`;
+    ctx.fillText(prizes[i].name,R-10,5);
+    ctx.restore();
+  }
+  ctx.beginPath();
+  ctx.arc(cx,cy,22,0,Math.PI*2);
+  ctx.fillStyle='#1a1a1a';
+  ctx.fill();
+  ctx.strokeStyle='#F97316';
+  ctx.lineWidth=3;
+  ctx.stroke();
+  ctx.fillStyle='#F97316';
+  ctx.font='bold 16px system-ui';
+  ctx.textAlign='center';
+  ctx.textBaseline='middle';
+  ctx.fillText('★',cx,cy);
+}
+
+function renderList(){
+  const list=document.getElementById('prizeList');
+  document.getElementById('prizeCount').textContent=`(${prizes.length})`;
+  list.innerHTML=prizes.map((p,i)=>`
+    <div class="prize-item">
+      <input type="color" class="prize-dot" value="${p.color}" title="Cambiar color" onchange="changeColor(${i},this.value)">
+      <input class="prize-name-input" value="${p.name}" maxlength="22" onchange="changeName(${i},this.value)" onblur="changeName(${i},this.value)">
+      <button class="del-btn" onclick="removePrize(${i})" aria-label="Eliminar">✕</button>
+    </div>
+  `).join('');
+  const hint=document.getElementById('hint');
+  hint.textContent=prizes.length<2?'Agrega mínimo 2 premios para girar.':prizes.length>=16?'Máximo 16 premios.':'';
+  drawWheel();
+}
+
+function addPrize(){
+  const name=document.getElementById('newName').value.trim();
+  const color=document.getElementById('newColor').value;
+  if(!name||prizes.length>=16)return;
+  prizes.push({name,color});
+  document.getElementById('newName').value='';
+  renderList();
+}
+
+function removePrize(i){
+  if(prizes.length<=1)return;
+  prizes.splice(i,1);
+  renderList();
+}
+
+function changeColor(i,v){prizes[i].color=v;renderList();}
+function changeName(i,v){if(v.trim())prizes[i].name=v.trim();renderList();}
+
+document.getElementById('newName').addEventListener('keydown',e=>{if(e.key==='Enter')addPrize();});
+
+function spin(){
+  if(spinning||prizes.length<2)return;
+  spinning=true;
+  document.getElementById('spinBtn').disabled=true;
+  document.getElementById('spinBtn').textContent='Girando...';
+  const extra=Math.random()*360;
+  const spins=5+Math.floor(Math.random()*5);
+  const totalDeg=spins*360+extra;
+  const totalRad=totalDeg*(Math.PI/180);
+  const duration=4000+Math.random()*1500;
+  const start=performance.now();
+  const startAngle=currentAngle;
+  function ease(t){return t<1?1-Math.pow(1-t,3):1;}
+  function frame(now){
+    const t=Math.min((now-start)/duration,1);
+    currentAngle=startAngle+totalRad*ease(t);
+    drawWheel();
+    if(t<1){animId=requestAnimationFrame(frame);}
+    else{
+      currentAngle=currentAngle%(2*Math.PI);
+      spinning=false;
+      document.getElementById('spinBtn').disabled=false;
+      document.getElementById('spinBtn').textContent='▶ Girar la ruleta';
+      showResult();
+    }
+  }
+  animId=requestAnimationFrame(frame);
+}
+
+function showResult(){
+  const n=prizes.length;
+  const arc=2*Math.PI/n;
+  const pointerAngle=(3*Math.PI/2);
+  let a=((pointerAngle-currentAngle)%(2*Math.PI)+2*Math.PI)%(2*Math.PI);
+  const idx=Math.floor(a/arc)%n;
+  document.getElementById('resultPrize').textContent=prizes[idx].name;
+  document.getElementById('resultPrize').style.color=prizes[idx].color;
+  document.getElementById('resultOverlay').classList.add('show');
+}
+
+function closeResult(){
+  document.getElementById('resultOverlay').classList.remove('show');
+}
+
+renderList();
+</script>
